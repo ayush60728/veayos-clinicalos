@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f766e" />
+      <stop offset="100%" stop-color="#042f2e" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#grad)"/>
+  <circle cx="256" cy="256" r="180" fill="#115e59" opacity="0.3"/>
+  <!-- Homoeopathic Leaf & Clinical Crest -->
+  <path d="M256 100 C200 160 190 230 235 305 C245 320 256 335 256 335 C256 335 267 320 277 305 C322 230 312 160 256 100 Z" fill="#ffffff" />
+  <path d="M256 135 C225 188 220 240 256 290 C256 225 282 185 256 135 Z" fill="#2dd4bf" opacity="0.9"/>
+  <!-- Horizontal Cross bar -->
+  <rect x="144" y="238" width="224" height="36" rx="18" fill="#ffffff" />
+  <!-- Three Globules (Homoeopathic remedies) -->
+  <circle cx="180" cy="385" r="28" fill="#5eead4" />
+  <circle cx="256" cy="400" r="34" fill="#ffffff" />
+  <circle cx="332" cy="385" r="28" fill="#5eead4" />
+</svg>

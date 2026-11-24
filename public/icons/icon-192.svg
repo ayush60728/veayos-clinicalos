@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <rect width="192" height="192" rx="42" fill="#0d9488"/>
+  <circle cx="96" cy="96" r="68" fill="#115e59" opacity="0.4"/>
+  <!-- Medical Caduceus / Botanical Leaf Crest -->
+  <path d="M96 38 C75 60 70 88 88 116 C92 122 96 128 96 128 C96 128 100 122 104 116 C122 88 117 60 96 38 Z" fill="#ffffff" />
+  <path d="M96 52 C84 72 82 92 96 110 C96 85 106 70 96 52 Z" fill="#5eead4" opacity="0.8"/>
+  <!-- Clinical Cross Horizontal Bar -->
+  <rect x="54" y="90" width="84" height="14" rx="7" fill="#ffffff" />
+  <!-- Pill circle accents -->
+  <circle cx="68" cy="142" r="10" fill="#99f6e4" />
+  <circle cx="96" cy="148" r="12" fill="#ffffff" />
+  <circle cx="124" cy="142" r="10" fill="#99f6e4" />
+</svg>

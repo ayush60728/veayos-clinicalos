@@ -1,0 +1,534 @@
+VEAYOS
+
+Homoeopathy
+ClinicalOS
+Product requirements brief for a customised clinical workflow platform
+Purpose
+Build a responsive, installable Progressive Web App (PWA) for a homoeopathy doctor. The system should make
+front-desk intake simple, help the doctor move through a patient queue, support fast prescription creation, and keep
+follow-ups and patient records organised.
+
+1. PATIENT INTAKE
+
+2. QUEUE
+
+3. CONSULTATION
+
+4. FOLLOW-UP
+
+Staff registers
+patient
+
+Patient waits
+for doctor
+
+History • repertory
+prescription
+
+Share • tests
+reminders
+
+Design direction
+Use the attached reference image as a visual direction: a clean clinical dashboard with a left navigation rail, a central
+appointment/queue workspace, compact status indicators, and a responsive layout across laptop, tablet and phone.
+Create an original VEAYOS interface; do not copy the reference product's branding or screen content.
+Branding note: The supplied image is a UI reference and contains another product's logo. This brief therefore uses a VEAYOS text
+wordmark. Replace it with the official VEAYOS logo asset when the separate logo file is supplied.
+
+Prepared for: Product / Engineering Team
+Platform: Responsive Web App + PWA | Primary users: Homoeopathy doctor and clinic staff
+
+Product requirements brief • Internal use
+
+Page 1
+
+VEAYOS / HOMOEOPATHY CLINICALOS
+
+1. Product overview
+The platform should have four primary work areas. The doctor should be able to move from the live queue to a
+patient's history, repertory-assisted symptom review, prescription, tests and follow-up without switching between
+unrelated screens.
+SECTION
+
+MAIN USER
+
+WHAT IT DOES
+
+Patient Intake
+
+Reception / staff
+
+Captures patient registration details and adds the patient to the doctor's queue.
+
+Doctor Workspace
+
+Doctor
+
+Queue, patient history, consultation, repertory search, prescription, tests and
+reports.
+
+Medicines & Presets
+
+Doctor / authorised staff
+
+Maintains reusable medicine entries and prescription favourites.
+
+Settings &
+Communication
+
+Doctor / admin
+
+Aisensy API configuration, WhatsApp sharing, follow-up reminders and clinic
+settings.
+
+Core workflow
+
+STAFF
+
+DOCTOR
+
+CONSULT
+
+COMPLETE
+
+Register patient
+Add to queue
+
+Call next patient
+Open history
+
+Symptoms + AI
+Create Rx
+
+Tests + share
+Set follow-up
+
+User roles and access
+ROLE
+
+PERMISSIONS
+
+Staff
+
+Create/update patient intake; view queue; add patient to queue; view basic visit status. No access to doctor-only
+clinical notes unless explicitly permitted.
+
+Doctor
+
+Access queue and full patient history; conduct consultation; use repertory model; create/sign prescriptions;
+prescribe tests; set follow-up; manage medicine presets and communication settings.
+
+Clinic admin
+
+Manage staff accounts, clinic profile, access permissions and audit records. Doctor may also hold this role.
+
+Important: The repertory AI model and its inference/API implementation will be provided by VEAYOS. The development
+team is responsible for integrating it into the PWA interface and mapping its output into the prescription workflow.
+
+Product requirements brief • Internal use
+
+Page 2
+
+VEAYOS / HOMOEOPATHY CLINICALOS
+
+2. Section One — Patient Intake & Queue
+Staff should register a patient before the consultation. The intake form must be quick to complete and should clearly
+distinguish mandatory fields from optional clinical/profile information.
+
+Patient intake form
+FIELD
+
+REQUIRED?
+
+NOTES
+
+Patient name
+
+Mandatory
+
+Full name as provided by the patient.
+
+Phone number
+
+Mandatory
+
+Primary mobile number; validate format and avoid duplicate records
+where possible.
+
+Address
+
+Mandatory
+
+Residential address; allow a multi-line entry.
+
+Age
+
+Mandatory
+
+Numeric age. Consider date of birth as an optional alternative, while
+retaining age display.
+
+Gender
+
+Mandatory
+
+Selectable field with an appropriate inclusive set of options.
+
+Email, occupation, emergency contact,
+referral source, notes, etc.
+
+Optional
+
+Additional patient profile fields can be added without blocking registration.
+
+Queue behaviour
+1. After saving the intake form, staff clicks Add to Queue.
+2. The patient appears in the live queue with arrival time, patient name, token/queue number and status.
+3. Suggested statuses: Waiting → Called → In Consultation → Completed. Also support Cancelled / No-show.
+4. Doctor sees the same queue in real time and can click Call Next or open a specific waiting patient.
+5. When the doctor opens the patient, the consultation workspace loads with patient identity and history.
+
+Queue dashboard should show
+WIDGET
+
+DISPLAY
+
+Queue summary
+
+Waiting count, currently consulting, completed today.
+
+Patient list
+
+Token, patient name, age, arrival time, status and action.
+
+Quick actions
+
+Call next, open patient, mark no-show, return to waiting (permission-controlled).
+
+3. Section Two — Doctor Workspace & Consultation
+This is the main clinical screen. Keep the patient's identity and visit context visible while the doctor reviews history,
+enters symptoms, uses repertory search and prepares the prescription.
+
+Patient history
+Add a prominent View Patient History action above the consultation/prescription area. It should open previous visits
+in date order, with access to earlier prescriptions, symptoms/notes, tests and attached reports, and follow-up records.
+Clearly distinguish the current visit from historical visits.
+
+Repertory search panel (VEAYOS-provided AI model)
+INPUT / OUTPUT
+
+REQUIREMENT
+
+Symptom entry
+
+Doctor can enter one or multiple symptoms, with relevant details such as location, sensation, modality and
+associated symptoms where supported by the model.
+
+Run repertory search
+
+Send the entered symptoms to the VEAYOS-provided repertory AI model through the agreed integration
+interface.
+
+Product requirements brief • Internal use
+
+Page 3
+
+VEAYOS / HOMOEOPATHY CLINICALOS
+
+INPUT / OUTPUT
+
+REQUIREMENT
+
+Results
+
+Display model results in a readable panel. Preserve the model's returned remedy/rubric information and
+any confidence/ranking fields it supplies; do not fabricate missing scores.
+
+Prescription mapping
+
+Provide an action to map selected results into the relevant prescription fields. Doctor must review and
+confirm before saving.
+
+Manual mode
+
+Doctor can ignore AI results and manually enter all prescription details at any time.
+
+Auto-fill requirement: Add an explicit “Add selected results to prescription” / “Auto-fill prescription” action. It should
+populate the applicable prescription fields from the repertory result, while allowing the doctor to edit every field. AI output
+must never be silently saved as a final prescription.
+
+Product requirements brief • Internal use
+
+Page 4
+
+VEAYOS / HOMOEOPATHY CLINICALOS
+
+4. Prescription builder
+The prescription editor should be simple, printable and suitable for the doctor's existing letterpad. The top of the
+prescription must reserve a fixed blank area for the doctor’s letterpad image.
+
+Letterpad layout requirement
+AREA
+
+SPECIFICATION
+
+Top letterpad space
+
+Keep the first 8 cm from the top of the prescription page empty for the doctor to upload/use their
+letterpad image. Do not place patient details, app branding, borders, headings or prescription content
+inside this reserved area.
+
+Letterpad upload
+
+Doctor can upload/replace a letterpad image in settings or prescription template settings. Support
+common image formats and preserve aspect ratio.
+
+Prescription body
+
+Start patient/visit information and prescription content below the reserved 8 cm region. Provide a clean
+print/PDF layout.
+
+Prescription content fields
+FIELD
+
+BEHAVIOUR
+
+Patient and visit details
+
+Patient name, age, gender, phone, visit date and patient/visit ID; auto-populate from the current
+record.
+
+Symptoms / clinical notes
+
+Allow manual entry and, where supported, doctor-approved transfer from repertory search.
+
+Diagnosis / assessment
+
+Free-text field; optional unless the doctor chooses to require it.
+
+Medicine
+
+Select from medicine presets or enter manually. Allow multiple medicines and editable instructions.
+
+Dosage / frequency / duration
+
+Structured fields plus an instruction/remarks field. Doctor must review all values.
+
+Advice and notes
+
+Free-text instructions for the patient.
+
+Follow-up date
+
+Date picker; used to schedule a reminder to the patient.
+
+Doctor signature / stamp
+
+Optional uploaded signature/stamp area, placed below the prescription content.
+
+Tests prescribed & report attachments
+Add a separate Tests Prescribed section in the consultation/prescription workflow. Doctor can add test name, date
+prescribed, instructions and status. Staff or doctor can later attach the report file or image to that test. The patient
+history should show the test and its attached report. Support common PDF and image attachments, with secure
+access controls.
+
+Save, print and share
+Provide Save Draft, Finalise Prescription, Print / Download PDF and Send via WhatsApp actions. Drafts should remain
+editable; finalised prescriptions should retain a version/history record if subsequently amended.
+
+Product requirements brief • Internal use
+
+Page 5
+
+VEAYOS / HOMOEOPATHY CLINICALOS
+
+5. Section Three — Medicines & Presets
+Doctors often prescribe the same medicines repeatedly. Add a reusable medicine library so the doctor does not need
+to re-enter the same details for every patient.
+CAPABILITY
+
+REQUIREMENT
+
+Create preset
+
+Doctor can save a medicine with a preferred name and commonly used prescription details (for example
+potency/strength, dosage, frequency, duration and instructions, as applicable).
+
+Use preset
+
+Search/select a saved preset from the prescription editor and insert it into the current prescription.
+
+Edit / archive
+
+Doctor can edit, duplicate or archive presets. Existing prescriptions must not change when a preset is later
+edited.
+
+Manual entry
+
+Manual medicine entry remains available even when presets exist.
+
+6. Section Four — Settings & Communication
+WhatsApp integration using Aisensy
+Provide a Settings page where the doctor/admin can enter and manage the clinic's Aisensy API credentials. Store
+credentials securely on the server side; never expose the API key in browser code, logs or the generated prescription
+PDF.
+FEATURE
+
+EXPECTED BEHAVIOUR
+
+Aisensy configuration
+
+Fields for required API credentials/configuration as per Aisensy documentation, plus a Test Connection
+action and clear connection status.
+
+Send prescription
+
+Doctor can send the finalised prescription to the patient's registered WhatsApp number after confirming the
+recipient and content.
+
+Follow-up reminder
+
+When a follow-up date is saved, schedule a reminder to be sent before that date. Timing should be
+configurable by the clinic (for example, one day before).
+
+Delivery tracking
+
+Show queued/sent/failed status and timestamp where the provider makes this information available.
+Provide retry for failed sends.
+
+Consent and opt-out
+
+Record patient consent for WhatsApp communication and provide a way to stop reminders/messages
+when requested. Use approved WhatsApp templates where required.
+
+7. Dashboard charts & visual design
+Add charts to make the dashboard informative without overwhelming the clinical workflow. Charts should be based on
+real system records and filterable by date range.
+CHART / KPI
+
+PURPOSE
+
+Patients per day / week / month
+
+Understand clinic footfall over time.
+
+Queue status summary
+
+Show waiting, in-consultation and completed patients for the selected day.
+
+Follow-ups due
+
+Highlight upcoming and overdue follow-ups.
+
+New vs returning patients
+
+Understand the mix of first-time and repeat visits.
+
+Tests prescribed
+
+Show test volume and report-pending status, if this data is captured.
+
+Visual direction: desktop-first clinical dashboard with responsive tablet and mobile layouts. Use a left navigation sidebar
+on larger screens, clear queue/status chips, readable tables, compact summary cards and restrained teal/white styling.
+On mobile, use a compact navigation pattern and prioritise queue, patient details and consultation actions.
+
+Product requirements brief • Internal use
+
+Page 6
+
+VEAYOS / HOMOEOPATHY CLINICALOS
+
+8. PWA, security & implementation notes
+PWA requirements
+AREA
+
+REQUIREMENT
+
+Responsive UI
+
+Usable on desktop, tablet and mobile. Main reference layout is a multi-device clinical dashboard.
+
+Installability
+
+Manifest, app icons and install prompt support so the clinic can install it on supported devices.
+
+Network handling
+
+Show connection state and avoid losing unsaved form/prescription data. Offline support for full clinical
+records should only be implemented with an explicit secure-sync design.
+
+Authentication
+
+Secure sign-in and role-based access for doctor, staff and admin.
+
+Audit trail
+
+Record important actions such as patient edits, prescription finalisation, report upload and message status
+changes.
+
+Data protection
+
+Encrypt data in transit and at rest; use secure file storage, access controls, backups and a defined retention
+policy. Do not expose API keys or patient data in client logs.
+
+9. Acceptance checklist
+The first release should be considered ready for clinic testing when the following can be demonstrated:
+■ Staff can create a patient using the five mandatory fields: name, phone, address, age and gender.
+■ Staff can add the patient to the queue and the doctor can see and call that patient.
+■ Doctor can open the patient record and view previous patient history.
+■ Doctor can enter symptoms, invoke the VEAYOS repertory AI integration and review results.
+■ Doctor can choose AI-assisted auto-fill or manually create the prescription.
+■ Prescription print/PDF keeps the top 8 cm blank for the uploaded letterpad image.
+■ Doctor can add tests and attach reports to the relevant patient visit.
+■ Doctor can save medicine presets and reuse them in later prescriptions.
+■ Doctor can configure Aisensy credentials securely and send a prescription via WhatsApp.
+■ A follow-up reminder is scheduled before the saved follow-up date and its delivery status is visible where supported.
+■ Dashboard charts reflect actual patient, queue and follow-up records.
+■ The PWA works responsively on laptop, tablet and phone with role-based access.
+
+Product requirements brief • Internal use
+
+Page 7
+
+VEAYOS / HOMOEOPATHY CLINICALOS
+
+10. Items to confirm before development
+DECISION
+
+CONFIRMATION NEEDED
+
+Doctor's letterpad
+
+Obtain the actual letterpad image and confirm whether it is a full-page background or a header image.
+Requirement currently reserves the top 8 cm.
+
+Repertory AI integration
+
+VEAYOS to provide API/SDK details, authentication method, request/response schema, supported
+symptom fields and test environment.
+
+Aisensy
+
+Confirm exact Aisensy API product, credentials, approved message templates and reminder timing.
+
+Patient data migration
+
+Confirm whether existing patient records need to be imported from spreadsheets or another system.
+
+Clinic identity
+
+Collect doctor's name, clinic name, contact details, logo/letterpad, signature/stamp and preferred
+prescription wording.
+
+Product principle
+The doctor remains in control of every clinical decision. Repertory AI assists the workflow; the doctor reviews and
+confirms all clinical content before a prescription is finalised.
+
+VEAYOS • Homoeopathy ClinicalOS
+A focused clinical workspace for homoeopathy practice.
+
+Product requirements brief • Internal use
+
+Page 8
+
+

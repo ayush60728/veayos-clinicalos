@@ -1,0 +1,131 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --letterpad-height: 80mm; /* Exactly 8cm reserved top area */
+}
+
+/* Modal and dialog scroll containment per Modern Web Guidance */
+dialog:modal {
+  overscroll-behavior: contain;
+}
+
+dialog::backdrop {
+  overflow: hidden;
+  overscroll-behavior: contain;
+  background-color: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Fixed 8 cm (80mm) Letterpad Reserved Area (Screen & Preview) */
+.letterpad-reserved-space {
+  height: 80mm;
+  min-height: 80mm;
+  max-height: 80mm;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Print Styles for Doctor's Letterpad & Prescription */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 11pt;
+  }
+
+  /* Hide everything except printable prescription */
+  body * {
+    visibility: hidden;
+  }
+
+  #printable-prescription-area, #printable-prescription-area * {
+    visibility: visible;
+  }
+
+  #printable-prescription-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 210mm;
+    min-height: 297mm;
+    margin: 0;
+    padding: 0 15mm 15mm 15mm;
+    box-sizing: border-box;
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  /* Letterpad Header - Fixed exactly 80mm (8cm) */
+  .letterpad-reserved-space {
+    height: 80mm !important;
+    min-height: 80mm !important;
+    max-height: 80mm !important;
+    width: 100% !important;
+    margin-bottom: 5mm;
+    overflow: hidden;
+    display: block;
+    box-sizing: border-box;
+  }
+
+  .letterpad-reserved-space img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: top center;
+  }
+
+  /* When printing on pre-printed physical letterhead, hide borders and guide labels */
+  .letterpad-preprinted-blank {
+    border: none !important;
+    border-bottom: none !important;
+    background: transparent !important;
+  }
+
+  .letterpad-preview-only {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}
