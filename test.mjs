@@ -133,5 +133,106 @@ assert(existsSync('frontend/dist/manifest.json'), 'frontend/dist/manifest.json m
 assert(existsSync('frontend/dist/sw.js'), 'frontend/dist/sw.js must exist');
 console.log('   ✓ Frontend production build distribution bundle verified.');
 
+// 8. Live Frontend-to-Backend End-to-End Interoperability Test
+console.log('8. Verifying Live Seamless Interoperability Between Frontend & Backend...');
+const backendApp = (await import('./backend/src/app.js')).default;
+let liveServer;
+let livePort;
+
+await new Promise((resolve) => {
+  liveServer = backendApp.listen(0, '127.0.0.1', () => {
+    livePort = liveServer.address().port;
+    resolve();
+  });
+});
+
+try {
+  // Point VITE_API_URL to the live backend server
+  process.env.VITE_API_URL = `http://127.0.0.1:${livePort}`;
+  
+  // Polyfill localStorage in Node.js environment if needed
+  if (typeof globalThis.localStorage === 'undefined') {
+    const store = new Map();
+    globalThis.localStorage = {
+      getItem: (key) => store.get(key) || null,
+      setItem: (key, val) => store.set(key, String(val)),
+      removeItem: (key) => store.delete(key),
+      clear: () => store.clear()
+    };
+  }
+
+  const { apiService, getApiBaseUrl, getHealthUrl } = await import('./frontend/src/services/apiService.js');
+  
+  assert.equal(getApiBaseUrl(), `http://127.0.0.1:${livePort}/api/v1`);
+  assert.equal(getHealthUrl(), `http://127.0.0.1:${livePort}/api/health`);
+
+  // 8.1 Backend Health Check via apiService
+  const healthRes = await apiService.checkHealth();
+  assert.equal(healthRes.status, 'healthy');
+  assert.equal(healthRes.whitelistEnforced, true);
+
+  // 8.2 Whitelist Practitioner Login & JWT Issuance
+  const loginRes = await apiService.loginWithEmail('vpdixit75@gmail.com', 'doctor');
+  assert.equal(loginRes.success, true);
+  assert(loginRes.token);
+  assert.equal(loginRes.user.email, 'vpdixit75@gmail.com');
+  assert.equal(apiService.getToken(), loginRes.token);
+
+  // 8.3 Whitelist Access Control: Unauthorized Account Rejection
+  let unauthorizedBlocked = false;
+  try {
+    await apiService.loginWithEmail('unauthorized@attacker.com', 'doctor');
+  } catch (err) {
+    unauthorizedBlocked = true;
+    assert.equal(err.status, 403);
+  }
+  assert(unauthorizedBlocked, 'Unauthorized login attempt must return HTTP 403');
+
+  // 8.4 Server-Side AI Repertory Proxying
+  const repertoryRes = await apiService.analyzeRepertory({
+    location: 'Epigastrium and stomach',
+    sensation: 'Severe burning and acid reflux',
+    modalitiesWorse: 'Spicy rich foods, coffee, late night work',
+    concomitants: 'Ineffectual urging for stool, irritability'
+  });
+  assert.equal(repertoryRes.success, true);
+  assert(Array.isArray(repertoryRes.data.remedies));
+  assert.equal(repertoryRes.data.remedies[0].remedy, 'Nux Vomica');
+
+  // 8.5 Queue & Prescriptions REST Operations
+  const queueRes = await apiService.addToQueue({
+    patientName: 'Test Live Patient',
+    phone: '+91 99887 76655',
+    chiefComplaint: 'Acute seasonal allergic rhinitis'
+  });
+  assert.equal(queueRes.success, true);
+  assert(queueRes.item.tokenNumber > 0);
+
+  const activeQueue = await apiService.getQueue();
+  assert(activeQueue.count > 0);
+
+  // 8.6 WhatsApp Prescription Dispatch via Backend
+  const waRes = await apiService.sendWhatsApp({
+    patient: {
+      id: 'P-TEST',
+      name: 'Test Live Patient',
+      phone: '+91 99887 76655',
+      consentWhatsApp: true
+    },
+    prescription: {
+      id: 'RX-TEST-001',
+      doctorName: 'Dr. V. P. Dixit',
+      medicines: [{ remedy: 'Allium Cepa', dosage: '4 globules', frequency: 'TDS' }]
+    }
+  });
+  assert.equal(waRes.success, true);
+  assert(waRes.message.includes('dispatched via WhatsApp'));
+
+  console.log('   ✓ Live Frontend apiService communicates seamlessly with Backend API.');
+} finally {
+  delete process.env.VITE_API_URL;
+  await new Promise((resolve) => liveServer.close(resolve));
+}
+
 console.log('\n🎉 ALL MASTER PRODUCTION SEPARATION VERIFICATION CHECKS PASSED!\n');
 process.exit(0);
