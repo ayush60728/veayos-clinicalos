@@ -1,5 +1,6 @@
 /**
  * Express Application Setup for VEAYOS Homoeopathy ClinicalOS Backend
+ * Production 3-Layer Architecture (Routes -> Controllers -> Services)
  */
 
 import dotenv from 'dotenv';
@@ -7,15 +8,9 @@ dotenv.config();
 
 import express from 'express';
 import cors from 'cors';
-import authRoutes from './routes/auth.routes.js';
-import repertoryRoutes from './routes/repertory.routes.js';
-import patientsRoutes from './routes/patients.routes.js';
-import queueRoutes from './routes/queue.routes.js';
-import prescriptionsRoutes from './routes/prescriptions.routes.js';
-import testsRoutes from './routes/tests.routes.js';
-import medicinesRoutes from './routes/medicines.routes.js';
-import settingsRoutes from './routes/settings.routes.js';
-import whatsappRoutes from './routes/whatsapp.routes.js';
+import { v1Router } from './routes/v1/index.js';
+import { notFoundHandler, errorHandler } from './middleware/error-handler.js';
+import { logger } from './config/logger.js';
 
 const app = express();
 
@@ -83,32 +78,13 @@ const healthPayload = () => ({
 app.get('/api/health', (req, res) => res.json(healthPayload()));
 app.get('/api/v1/health', (req, res) => res.json(healthPayload()));
 
-// API v1 Routes
-app.use('/api/v1/auth', authRoutes);
-app.use('/api/v1/repertory', repertoryRoutes);
-app.use('/api/v1/patients', patientsRoutes);
-app.use('/api/v1/queue', queueRoutes);
-app.use('/api/v1/prescriptions', prescriptionsRoutes);
-app.use('/api/v1/tests', testsRoutes);
-app.use('/api/v1/medicines', medicinesRoutes);
-app.use('/api/v1/settings', settingsRoutes);
-app.use('/api/v1/whatsapp', whatsappRoutes);
+// API v1 Routes (Clean 3-layer architecture)
+app.use('/api/v1', v1Router);
 
 // 404 Handler for undefined API routes
-app.use('/api/*', (req, res) => {
-  res.status(404).json({
-    success: false,
-    error: `API route '${req.originalUrl}' not found.`
-  });
-});
+app.use('/api/*', notFoundHandler);
 
 // Global Error Handler
-app.use((err, req, res, next) => {
-  console.error('Unhandled server error:', err);
-  res.status(500).json({
-    success: false,
-    error: err.message || 'Internal Server Error'
-  });
-});
+app.use(errorHandler);
 
 export default app;

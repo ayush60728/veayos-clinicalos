@@ -22,19 +22,67 @@ Production-grade RESTful API service for **VEAYOS Homoeopathy ClinicalOS**. Prov
 
 ---
 
-## 📁 Directory Structure
+## 📁 Directory Structure (Enterprise 3-Layer Architecture)
 
 ```
 backend/
 ├── src/
-│   ├── config/             # Constants & Firebase Admin credentials
-│   ├── middleware/         # JWT verification & whitelist auth guards
-│   ├── routes/             # REST API routers (auth, repertory, queue, etc.)
-│   ├── services/           # Backend business logic & data persistence
-│   ├── app.js              # Express app setup, CORS, and route binding
+│   ├── config/             # Constants, Firebase Admin, logger & environment settings
+│   │   ├── constants.js
+│   │   ├── env.js
+│   │   ├── firebase.js
+│   │   └── logger.js
+│   ├── controllers/        # Request handlers & HTTP orchestration
+│   │   ├── auth.controller.js
+│   │   ├── medicines.controller.js
+│   │   ├── patients.controller.js
+│   │   ├── prescriptions.controller.js
+│   │   ├── queue.controller.js
+│   │   ├── repertory.controller.js
+│   │   ├── settings.controller.js
+│   │   ├── tests.controller.js
+│   │   └── whatsapp.controller.js
+│   ├── middleware/         # Security, JWT auth, validation & error handling
+│   │   ├── auth.js
+│   │   ├── error-handler.js
+│   │   └── validate.js
+│   ├── routes/             # Versioned REST API routing endpoints
+│   │   ├── v1/
+│   │   │   ├── auth.routes.js
+│   │   │   ├── index.js
+│   │   │   ├── medicines.routes.js
+│   │   │   ├── patients.routes.js
+│   │   │   ├── prescriptions.routes.js
+│   │   │   ├── queue.routes.js
+│   │   │   ├── repertory.routes.js
+│   │   │   ├── settings.routes.js
+│   │   │   ├── tests.routes.js
+│   │   │   └── whatsapp.routes.js
+│   ├── services/           # Core business logic & persistence gateways
+│   │   ├── aisensy.service.js
+│   │   ├── dataStore.js
+│   │   ├── gemini.service.js
+│   │   └── repertoryService.js
+│   ├── utils/              # Standardized API response helpers, error classes & logger
+│   │   ├── apiResponse.js
+│   │   ├── appError.js
+│   │   ├── asyncHandler.js
+│   │   └── logger.js
+│   ├── validators/         # Input validation schemas & middleware rules
+│   │   ├── auth.validator.js
+│   │   ├── index.js
+│   │   ├── intake.validator.js
+│   │   ├── medicines.validator.js
+│   │   ├── patients.validator.js
+│   │   ├── prescriptions.validator.js
+│   │   ├── queue.validator.js
+│   │   ├── repertory.validator.js
+│   │   ├── tests.validator.js
+│   │   └── whatsapp.validator.js
+│   ├── app.js              # Express app setup, CORS, and route mounting
 │   └── server.js           # Server listen entrypoint (default port 5000)
 ├── test/
-│   └── backend.test.js     # Native Node.js test runner suite (25 tests)
+│   └── backend.test.js     # Native Node.js test runner suite (26 automated tests)
 ├── .dockerignore           # Docker build exclusions
 ├── .env.example            # Backend environment template
 ├── Dockerfile              # Hardened production Node.js 20 Alpine container
