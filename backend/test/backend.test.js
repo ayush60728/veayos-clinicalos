@@ -43,6 +43,18 @@ describe('VEAYOS Backend API Verification Suite', () => {
       const data = await res.json();
       assert.equal(data.service, 'VEAYOS Homoeopathy ClinicalOS API');
     });
+
+    it('OPTIONS /api/health should return valid CORS headers for allowed origins', async () => {
+      const res = await fetch(`${baseUrl}/api/health`, {
+        method: 'OPTIONS',
+        headers: {
+          'Origin': 'http://localhost:5173',
+          'Access-Control-Request-Method': 'GET'
+        }
+      });
+      assert.equal(res.status, 204);
+      assert.equal(res.headers.get('access-control-allow-origin'), 'http://localhost:5173');
+    });
   });
 
   // 2. Strict Whitelist Authentication & Google Sign-In

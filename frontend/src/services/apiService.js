@@ -2,9 +2,38 @@
  * Frontend API Service Layer
  * Connects the PWA client with the dedicated Node.js backend (/api/v1/...)
  * Automatically handles JWT Authorization headers and graceful offline fallbacks.
+ * Configured with VITE_API_URL (configurable via .env, defaulting to backend URL in dev).
  */
 
-const API_BASE = '/api/v1';
+export const getApiBaseUrl = () => {
+  let envUrl = '';
+  try {
+    if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL) {
+      envUrl = import.meta.env.VITE_API_URL;
+    }
+  } catch {}
+
+  if (!envUrl && typeof process !== 'undefined' && process.env && process.env.VITE_API_URL) {
+    envUrl = process.env.VITE_API_URL;
+  }
+
+  if (envUrl) {
+    const trimmed = envUrl.trim().replace(/\/+$/, '');
+    return trimmed.endsWith('/api/v1') ? trimmed : `${trimmed}/api/v1`;
+  }
+
+  // Fallback to relative /api/v1 (handled by Vite dev proxy or reverse proxy in prod)
+  return '/api/v1';
+};
+
+export const getHealthUrl = () => {
+  const base = getApiBaseUrl();
+  return base.endsWith('/api/v1')
+    ? base.replace(/\/api\/v1$/, '/api/health')
+    : '/api/health';
+};
+
+const API_BASE = getApiBaseUrl();
 const TOKEN_KEY = 'veayos_auth_token';
 
 export const apiService = {
@@ -67,7 +96,10 @@ export const apiService = {
   // Backend Health Check
   async checkHealth() {
     try {
-      const res = await fetch('/api/health');
+      const healthUrl = API_BASE.endsWith('/api/v1')
+        ? API_BASE.replace(/\/api\/v1$/, '/api/health')
+        : '/api/health';
+      const res = await fetch(healthUrl);
       if (res.ok) {
         return await res.json();
       }

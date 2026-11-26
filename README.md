@@ -1,136 +1,133 @@
-# VEAYOS Homoeopathy ClinicalOS (Full-Stack PWA & REST API)
+# VEAYOS Homoeopathy ClinicalOS
 
 <div align="center">
   <img src="public/logo.png" alt="VEAYOS Homoeopathy Logo" width="160" />
   <h3>Production-Grade Homoeopathy Clinical Practice OS & Classical Repertory Engine</h3>
-  <p>Dedicated Node.js REST API Backend + Vite React Progressive Web App (PWA)</p>
+  <p>Clean Standalone Architecture: Frontend PWA + Dedicated Express.js REST API Backend</p>
 </div>
 
 ---
 
-## 🌟 Key Architecture & Highlights
+## 🏛️ Project Architecture & Repository Separation
 
-1. **Official VEAYOS Company Logo Branding**:
-   - High-resolution company emblem integrated across Navbar, Collapsible Sidebar, Doctor Login Modal, and Digital Letterhead Prescriptions.
-   - PWA launcher icons generated in `192x192`, `512x512`, and crisp `favicon.png`.
+The system is architected as two decoupled, production-grade standalone projects that can be deployed, tested, and maintained independently or orchestrated together:
 
-2. **Dedicated Production-Ready Node.js Backend (`backend/`)**:
-   - **Strict 2-Account Whitelist**:
-     - `Dr. V. P. Dixit` (`vpdixit75@gmail.com`)
-     - `Dr. Ved Prakash` (`ved@veayos.com`)
-     - Non-whitelisted accounts are strictly rejected with HTTP `403 Forbidden`.
-   - **Google Sign-In API (`/api/v1/auth/google`)**:
-     - Supports Google credential & email validation with JWT session tokens (`HS256`, 7-day expiry).
-     - Token re-verification (`/api/v1/auth/verify`) and user profile route (`/api/v1/auth/me`).
-   - **Secure Server-Side Gemini AI Repertory Proxy (`/api/v1/repertory/analyze`)**:
-     - Keeps Google Gemini API keys securely on the server side without browser exposure.
-     - Automatically falls back to internal **Classical Kentian Repertory Engine** with weighted rubric scoring, grades (1 to 3), and Materia Medica keynotes.
-   - **Complete Clinical REST Endpoints**:
-     - Patients (`/api/v1/patients`)
-     - Live Queue (`/api/v1/queue`)
-     - Prescriptions (`/api/v1/prescriptions`)
-     - Diagnostic Lab Tests (`/api/v1/tests`)
-     - Medicine Presets (`/api/v1/medicines`)
-     - Clinic & Letterpad Settings (`/api/v1/settings`)
-     - Aisensy WhatsApp Dispatch (`/api/v1/whatsapp/send`, `/api/v1/whatsapp/test`, `/api/v1/whatsapp/logs`) with strict patient consent validation.
-
-3. **Frontend PWA Client (`src/`)**:
-   - Vite dev server with reverse proxy (`/api` -> `http://localhost:5000`).
-   - Centralized `apiService.js` client layer.
-   - Offline-capable with Firebase Cloud Firestore sync and localStorage resilience.
-   - Top 8.0 cm (80mm) blank reservation strictly honored for clinic letterpad printing.
+| Component | Standalone Directory | Dedicated GitHub Repository | Primary Tech Stack |
+| :--- | :--- | :--- | :--- |
+| **Frontend PWA** | [`frontend/`](file:///home/ayush/Desktop/DEV/PWA/frontend) | [ayush60728/veayos-clinicalos-frontend](https://github.com/ayush60728/veayos-clinicalos-frontend) | React 19, Vite 7, Tailwind CSS, PWA, Firebase SDK |
+| **Backend API** | [`backend/`](file:///home/ayush/Desktop/DEV/PWA/backend) | [ayush60728/veayos-clinicalos-backend](https://github.com/ayush60728/veayos-clinicalos-backend) | Node.js 20, Express, JWT, Firebase Admin SDK, Gemini AI, Aisensy |
+| **Fullstack Workspace** | Root Directory | [ayush60728/veayos-clinicalos](https://github.com/ayush60728/veayos-clinicalos) | Docker Compose, Concurrently, Unified Test Runner |
 
 ---
 
-## 🚀 Quick Start Guide
+## 🌟 Key Capabilities
 
-### 1. Install Dependencies
+### 1. Frontend PWA (`frontend/`)
+- **React 19 & Vite 7 Architecture**: Sub-second HMR with optimized tree-shaking production build.
+- **Official VEAYOS Branding**: High-resolution company logos across letterhead, navigation, login, and print layouts.
+- **PWA Ready**: Offline caching, installable manifest (`manifest.json`), service worker (`sw.js`), and responsive clinical vector icons.
+- **Clinical Modules**:
+  - Live Queue Management with automatic token issuance (`T-1001`).
+  - Patient Intake Registry with 5 mandatory clinical fields and phone duplicate lookup.
+  - Classical Kentian Repertory totality scoring and potency selection (6C, 30C, 200C, 1M, 10M, LM).
+  - 8.0 cm (80mm) blank letterhead reservation for pre-printed clinical stationery.
+  - Multi-device Cloud Firestore sync with seamless offline fallback.
+- **Configurable Backend Integration**: `apiService.js` resolves `VITE_API_URL` (configurable via `.env`, defaulting to backend URL in dev).
+
+### 2. Backend API (`backend/`)
+- **Strict 2-Account Whitelist Access Control**:
+  - **Dr. V. P. Dixit** (`vpdixit75@gmail.com`) — Senior Homoeopath & Medical Director
+  - **Dr. Ved Prakash** (`ved@veayos.com`) — Consultant Homoeopath & Operations Lead
+  - Non-whitelisted accounts are strictly rejected with HTTP `403 Forbidden`.
+- **Google OAuth Verification**: Validates Google ID tokens and checks credentials against the whitelist before issuing JWTs (`7d` expiry).
+- **Gemini AI Repertory Proxy**: Server-side proxy keeping Gemini API keys secure with classical Kentian fallback.
+- **Aisensy WhatsApp Gateway**: Dispatches formatted prescriptions and appointment reminders with strict opt-out compliance.
+- **Firebase Admin SDK**: Server-side Cloud Firestore integration with in-memory fallback.
+- **Production CORS**: Configurable frontend origins (`FRONTEND_URL` / `CORS_ORIGIN`) supporting localhost and deployed domains.
+
+---
+
+## 🚀 Getting Started
+
+### 1. Running the Full Stack (Root Workspace)
+
+Install all dependencies:
 ```bash
-# Frontend dependencies
 npm install
-
-# Backend dependencies
-cd backend && npm install && cd ..
+npm --prefix frontend install
+npm --prefix backend install
 ```
 
-### 2. Configure Environment Variables
+Run both frontend and backend concurrently:
 ```bash
-# Frontend Firebase config (Optional for Cloud Firestore sync)
+npm run dev
+```
+- Frontend will open at `http://localhost:5173`
+- Backend API will listen at `http://localhost:5000`
+
+### 2. Running Standalone Frontend
+```bash
+cd frontend
 cp .env.example .env
-
-# Backend configuration (Gemini & Aisensy keys)
-cp backend/.env.example backend/.env
+npm install
+npm run dev
 ```
 
-### 3. Run Development Servers
+### 3. Running Standalone Backend
 ```bash
-# Run both Frontend PWA (port 5173) and Backend API (port 5000) concurrently:
-npm run dev:all
-
-# Or run separately:
-npm run dev          # Frontend only: http://localhost:5173
-npm run dev:backend  # Backend only: http://localhost:5000
+cd backend
+cp .env.example .env
+npm install
+npm run dev
 ```
 
-### 4. Build for Production
-```bash
-npm run build
-```
+---
 
-### 5. Automated Verification Suites
+## 🧪 Testing & Verification
+
+Each project has its own dedicated automated verification suite:
+
 ```bash
-# Runs both Frontend deep test suite & Backend API test suite:
+# Run all workspace tests (master verification)
 npm test
 
-# Run individually:
-npm run test:frontend # 10 frontend verification suites
-npm run test:backend  # 24 backend API tests across 9 test suites
+# Run only frontend verification suite (10 test suites)
+npm run test:frontend
+# OR: cd frontend && npm test
+
+# Run only backend verification suite (25 test assertions)
+npm run test:backend
+# OR: cd backend && npm test
 ```
 
 ---
 
-## 📡 REST API Reference
+## 🐳 Docker Deployment
 
-| Method | Endpoint | Description | Whitelist Enforced |
-|---|---|---|:---:|
-| `GET` | `/api/health` | Service health & metadata | Public |
-| `GET` | `/api/v1/auth/whitelist` | List authorized practitioner profiles | Public |
-| `POST` | `/api/v1/auth/google` | Google sign-in & JWT token issue | **Strict 2-Account** |
-| `POST` | `/api/v1/auth/login` | Email sign-in & JWT token issue | **Strict 2-Account** |
-| `POST` | `/api/v1/auth/verify` | Verify active session token | Yes |
-| `GET` | `/api/v1/auth/me` | Authenticated practitioner details | Yes |
-| `POST` | `/api/v1/repertory/analyze` | Gemini AI + Kentian Repertory Proxy | Yes |
-| `GET` / `POST` | `/api/v1/patients` | Patient directory CRUD | Yes |
-| `GET` / `POST` | `/api/v1/queue` | Live token queue & consult status | Yes |
-| `GET` / `POST` | `/api/v1/prescriptions` | Homoeopathy prescriptions | Yes |
-| `GET` / `POST` | `/api/v1/tests` | Lab and diagnostic reports | Yes |
-| `GET` / `POST` | `/api/v1/medicines` | Remedies & Materia Medica library | Yes |
-| `GET` / `PUT` | `/api/v1/settings` | Clinic profile & Aisensy gateway | Yes |
-| `POST` | `/api/v1/whatsapp/send` | Aisensy WhatsApp message dispatch | Yes (Patient Consent) |
-| `POST` | `/api/v1/whatsapp/test` | Test Aisensy WhatsApp connection | Yes |
-
----
-
-## 🔒 Security & Whitelist Compliance
-
-Access is strictly restricted to authorized clinic practitioners:
-1. `vpdixit75@gmail.com` — **Dr. V. P. Dixit**, Senior Homoeopath & Medical Director
-2. `ved@veayos.com` — **Dr. Ved Prakash**, Consultant Homoeopath & Operations Lead
-
-Any attempt to log in or obtain session tokens using any other email or Google ID returns `HTTP 403 Forbidden: Access Denied`.
-
----
-
-## 📦 Push to GitHub
-
-The repository is fully configured with clean git tracking and proper `.gitignore` (secrets and node_modules excluded).
-
-To push to GitHub:
+Run the complete multi-container stack with Docker Compose:
 ```bash
-# Create repository via GitHub CLI (already authenticated):
-gh repo create veayos-clinicalos --public --source=. --remote=origin --push
-
-# Or push to an existing GitHub remote repository:
-git remote add origin https://github.com/<your-username>/<repo-name>.git
-git push -u origin main
+docker compose up --build
 ```
+- Frontend Nginx Web Server: `http://localhost:8080`
+- Backend Express API Server: `http://localhost:5000`
+- Integrated healthchecks and automatic service dependency resolution.
+
+Or build and run each independently:
+```bash
+# Standalone Backend Docker Container
+docker build -t veayos-backend backend/
+docker run -p 5000:5000 --env-file backend/.env veayos-backend
+
+# Standalone Frontend Docker Container
+docker build -t veayos-frontend frontend/
+docker run -p 80:80 veayos-frontend
+```
+
+---
+
+## 📦 Dedicated Git Repositories
+
+Each subproject has been prepared and published as an independent GitHub repository:
+- **Frontend PWA**: https://github.com/ayush60728/veayos-clinicalos-frontend
+- **Backend API**: https://github.com/ayush60728/veayos-clinicalos-backend
+- **Fullstack Workspace**: https://github.com/ayush60728/veayos-clinicalos

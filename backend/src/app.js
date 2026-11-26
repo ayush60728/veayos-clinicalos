@@ -16,9 +16,24 @@ import whatsappRoutes from './routes/whatsapp.routes.js';
 
 const app = express();
 
-// Middleware
+// CORS Configuration with Production Origins Support (FRONTEND_URL or CORS_ORIGIN)
+const rawCorsOrigin = process.env.FRONTEND_URL || process.env.CORS_ORIGIN || '*';
+const allowedOrigins = rawCorsOrigin === '*'
+  ? '*'
+  : rawCorsOrigin.split(',').map((o) => o.trim()).filter(Boolean);
+
 app.use(cors({
-  origin: '*',
+  origin: (origin, callback) => {
+    // Allow server-to-server, curl, mobile apps without Origin header, or wildcard mode
+    if (!origin || allowedOrigins === '*' || (Array.isArray(allowedOrigins) && allowedOrigins.includes('*'))) {
+      return callback(null, true);
+    }
+    if (Array.isArray(allowedOrigins) && allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error(`Origin ${origin} is not allowed by CORS policy.`));
+  },
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'x-auth-token', 'x-gemini-key']
 }));

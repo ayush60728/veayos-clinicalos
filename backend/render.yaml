@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: veayos-clinicalos-api
+    env: node
+    region: oregon
+    plan: starter
+    buildCommand: npm install --production
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ORIGIN
+        sync: false
+      - key: WHITELIST_ACCOUNTS
+        value: vpdixit75@gmail.com,ved@veayos.com
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: AISENSY_API_KEY
+        sync: false
+      - key: AISENSY_SENDER_NUMBER
+        value: "+919811234567"
+      - key: AISENSY_PRESCRIPTION_CAMPAIGN
+        value: prescription_share_v1
+      - key: AISENSY_REMINDER_CAMPAIGN
+        value: followup_reminder_v1

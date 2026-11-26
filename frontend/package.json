@@ -1,0 +1,40 @@
+{
+  "name": "veayos-clinicalos-frontend",
+  "version": "1.0.0",
+  "description": "Production-ready Progressive Web Application for VEAYOS Homoeopathy ClinicalOS",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "start": "vite preview --port 5173",
+    "preview": "vite preview",
+    "test": "node test/frontend.test.mjs"
+  },
+  "keywords": [
+    "veayos",
+    "homoeopathy",
+    "clinicalos",
+    "pwa",
+    "react",
+    "vite",
+    "tailwind"
+  ],
+  "author": "VEAYOS Team",
+  "license": "ISC",
+  "dependencies": {
+    "canvas-confetti": "^1.9.4",
+    "clsx": "^2.1.1",
+    "firebase": "^13.4.0",
+    "lucide-react": "^0.468.0",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^5.0.3",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.17",
+    "vite": "^7.1.7"
+  }
+}
