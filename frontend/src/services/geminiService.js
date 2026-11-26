@@ -5,6 +5,8 @@
  * Includes a comprehensive offline homoeopathic repertory fallback engine.
  */
 
+import { apiService } from './apiService.js';
+
 const GEMINI_STORAGE_KEY = 'veayos_gemini_api_key';
 const GEMINI_MODEL_STORAGE_KEY = 'veayos_gemini_model';
 const DEFAULT_MODEL = 'gemini-1.5-flash';
@@ -307,37 +309,27 @@ export const geminiService = {
   }) {
     const apiKey = this.getApiKey();
 
-    // 1. First attempt dedicated backend proxy (/api/v1/repertory/analyze)
+    // 1. First attempt dedicated backend proxy (/api/v1/repertory/analyze) via apiService
     // Keeps Gemini keys secure on server side without exposure
     try {
-      const backendRes = await fetch('/api/v1/repertory/analyze', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(apiKey ? { 'x-gemini-key': apiKey } : {})
-        },
-        body: JSON.stringify({
-          location,
-          sensation,
-          modalitiesWorse,
-          modalitiesBetter,
-          concomitants,
-          mentals,
-          freeNotes,
-          patientAge,
-          patientGender,
-          model: this.getModel()
-        })
-      });
+      const payload = await apiService.analyzeRepertory({
+        location,
+        sensation,
+        modalitiesWorse,
+        modalitiesBetter,
+        concomitants,
+        mentals,
+        freeNotes,
+        patientAge,
+        patientGender,
+        model: this.getModel()
+      }, apiKey);
 
-      if (backendRes.ok) {
-        const payload = await backendRes.json();
-        if (payload.success && payload.data && Array.isArray(payload.data.remedies) && payload.data.remedies.length > 0) {
-          return payload.data;
-        }
+      if (payload && payload.success && payload.data && Array.isArray(payload.data.remedies) && payload.data.remedies.length > 0) {
+        return payload.data;
       }
     } catch (backendErr) {
-      // If backend is offline, proceed with client execution
+      // If backend is offline or returns error, proceed gracefully with direct client execution / fallback KB
     }
 
     const symptomsSummary = `

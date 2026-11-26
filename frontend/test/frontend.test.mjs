@@ -487,7 +487,7 @@ assert(loginModalJsx.includes('handleGoogleSignIn'), 'LoginModal must implement 
 const printModalJsxContent = readFileSync('src/components/PrescriptionPrintModal.jsx', 'utf8');
 assert(printModalJsxContent.includes('src="/logo.png"'), 'PrescriptionPrintModal must render official company logo on letterhead');
 
-// 10.3 Verify apiService VITE_API_URL Resolution
+// 10.3 Verify apiService VITE_API_URL Resolution & Dynamic Edge Cases
 const { apiService, getApiBaseUrl, getHealthUrl } = await import('../src/services/apiService.js');
 assert.equal(typeof apiService.request, 'function', 'apiService must provide request method');
 assert.equal(typeof apiService.checkHealth, 'function', 'apiService must provide checkHealth method');
@@ -495,16 +495,47 @@ assert.equal(typeof apiService.analyzeRepertory, 'function', 'apiService must pr
 assert.equal(typeof apiService.sendWhatsApp, 'function', 'apiService must provide sendWhatsApp method');
 
 // Test default relative base URLs
-assert(getApiBaseUrl().includes('/api/v1'), 'Base URL must include /api/v1');
-assert(getHealthUrl().includes('/api/health'), 'Health URL must include /api/health');
+assert.equal(getApiBaseUrl(), '/api/v1', 'Default base URL must be /api/v1');
+assert.equal(getHealthUrl(), '/api/health', 'Default health URL must be /api/health');
 
-// Test with simulated custom VITE_API_URL
+// Test with empty string and whitespace VITE_API_URL
+process.env.VITE_API_URL = '';
+assert.equal(getApiBaseUrl(), '/api/v1', 'Empty VITE_API_URL must fallback to /api/v1');
+assert.equal(getHealthUrl(), '/api/health', 'Empty VITE_API_URL must fallback to /api/health');
+
+process.env.VITE_API_URL = '   ';
+assert.equal(getApiBaseUrl(), '/api/v1', 'Whitespace VITE_API_URL must fallback to /api/v1');
+assert.equal(getHealthUrl(), '/api/health', 'Whitespace VITE_API_URL must fallback to /api/health');
+
+// Test simulated custom VITE_API_URL without trailing slash
 process.env.VITE_API_URL = 'https://api.veayos-clinicalos.com';
 assert.equal(getApiBaseUrl(), 'https://api.veayos-clinicalos.com/api/v1', 'getApiBaseUrl must respect custom VITE_API_URL');
 assert.equal(getHealthUrl(), 'https://api.veayos-clinicalos.com/api/health', 'getHealthUrl must respect custom VITE_API_URL');
+
+// Test simulated custom VITE_API_URL with trailing slash
+process.env.VITE_API_URL = 'https://api.veayos-clinicalos.com/';
+assert.equal(getApiBaseUrl(), 'https://api.veayos-clinicalos.com/api/v1', 'Trailing slash in VITE_API_URL must be normalized');
+assert.equal(getHealthUrl(), 'https://api.veayos-clinicalos.com/api/health', 'Trailing slash in VITE_API_URL must be normalized');
+
+// Test simulated custom VITE_API_URL already containing /api/v1
+process.env.VITE_API_URL = 'https://api.veayos-clinicalos.com/api/v1';
+assert.equal(getApiBaseUrl(), 'https://api.veayos-clinicalos.com/api/v1', 'VITE_API_URL with /api/v1 must not duplicate');
+assert.equal(getHealthUrl(), 'https://api.veayos-clinicalos.com/api/health', 'Health URL must replace /api/v1 with /api/health');
+
 delete process.env.VITE_API_URL;
 
-// 10.4 Verify Zero Cross-Directory Bleed (Frontend must not reference backend/ paths)
+// 10.4 Verify Services Route Through apiService (Zero Hardcoded Raw /api/v1 Fetches)
+const geminiSrc = readFileSync('src/services/geminiService.js', 'utf8');
+assert(geminiSrc.includes("import { apiService } from './apiService.js'"), 'geminiService must import apiService');
+assert(geminiSrc.includes('apiService.analyzeRepertory'), 'geminiService must use apiService.analyzeRepertory');
+assert(!geminiSrc.includes("fetch('/api/v1/repertory/analyze'"), 'geminiService must not bypass apiService with raw fetch');
+
+const aisensySrc = readFileSync('src/services/aisensyService.js', 'utf8');
+assert(aisensySrc.includes("import { apiService } from './apiService.js'"), 'aisensyService must import apiService');
+assert(aisensySrc.includes('apiService.sendWhatsApp'), 'aisensyService must use apiService.sendWhatsApp');
+assert(!aisensySrc.includes("fetch('/api/v1/whatsapp/send'"), 'aisensyService must not bypass apiService with raw fetch');
+
+// 10.5 Verify Zero Cross-Directory Bleed (Frontend must not reference backend/ paths)
 const viteConfigContent = readFileSync('vite.config.js', 'utf8');
 assert(!viteConfigContent.includes('../backend'), 'vite.config.js must not depend on ../backend');
 

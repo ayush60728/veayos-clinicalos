@@ -149,16 +149,25 @@ gcloud run deploy veayos-backend \
 
 ---
 
-## 📦 Pushing to a Separate GitHub Repository (Polyrepo)
+## 🧪 Testing
 
-To publish this backend as its own dedicated GitHub repository:
+Run the full automated test suite:
+```bash
+npm test
+```
+All 26 test assertions covering system health, CORS headers & multi-origin normalization, 2-practitioner whitelist enforcement, Google OAuth verification, patients CRUD, live queue management, prescriptions lifecycle, repertory proxy, and Aisensy WhatsApp gateway will run and output verified pass statuses.
 
+---
+
+## 📦 Standalone GitHub Repository (Polyrepo)
+
+This backend is published and maintained as a standalone GitHub repository:
+- **GitHub Repository**: [ayush60728/veayos-clinicalos-backend](https://github.com/ayush60728/veayos-clinicalos-backend)
+
+To push changes to this repository:
 ```bash
 cd backend
-git init
 git add .
-git commit -m "feat: initial commit for VEAYOS Homoeopathy ClinicalOS Backend API"
-git branch -M main
-git remote add origin https://github.com/<YOUR_ORGANIZATION>/veayos-clinicalos-backend.git
-git push -u origin main
+git commit -m "feat: updates to backend"
+git push origin main
 ```

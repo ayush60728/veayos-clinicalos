@@ -9,14 +9,14 @@ ENV NODE_ENV=production
 ENV PORT=5000
 
 # Copy package manifests first for optimal Docker layer caching
-COPY package*.json ./
+COPY --chown=node:node package*.json ./
 
 # Install only production dependencies
 RUN npm ci --only=production && npm cache clean --force
 
 # Copy application source code
-COPY src/ ./src/
-COPY server.js ./
+COPY --chown=node:node src/ ./src/
+COPY --chown=node:node server.js ./
 
 # Switch to standard non-root node user for hardened container security
 USER node

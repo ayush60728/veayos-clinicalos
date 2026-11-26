@@ -54,6 +54,66 @@ describe('VEAYOS Backend API Verification Suite', () => {
       });
       assert.equal(res.status, 204);
       assert.equal(res.headers.get('access-control-allow-origin'), 'http://localhost:5173');
+      assert.equal(res.headers.get('access-control-allow-credentials'), 'true');
+    });
+
+    it('CORS should dynamically permit multiple configured origins and normalize trailing slashes', async () => {
+      const originalOrigin = process.env.CORS_ORIGIN;
+      const originalFrontendUrl = process.env.FRONTEND_URL;
+      try {
+        process.env.FRONTEND_URL = 'https://veayos-clinicalos-pwa.web.app';
+        process.env.CORS_ORIGIN = 'https://app.veayos.com,https://doctor-portal.org/,http://localhost:5173';
+        
+        // 1. Origin from FRONTEND_URL
+        const res0 = await fetch(`${baseUrl}/api/health`, {
+          headers: { 'Origin': 'https://veayos-clinicalos-pwa.web.app' }
+        });
+        assert.equal(res0.status, 200);
+        assert.equal(res0.headers.get('access-control-allow-origin'), 'https://veayos-clinicalos-pwa.web.app');
+
+        // 2. First configured origin from CORS_ORIGIN
+        const res1 = await fetch(`${baseUrl}/api/health`, {
+          headers: { 'Origin': 'https://app.veayos.com' }
+        });
+        assert.equal(res1.status, 200);
+        assert.equal(res1.headers.get('access-control-allow-origin'), 'https://app.veayos.com');
+
+        // 3. Second configured origin (which was configured with a trailing slash)
+        const res2 = await fetch(`${baseUrl}/api/health`, {
+          headers: { 'Origin': 'https://doctor-portal.org' }
+        });
+        assert.equal(res2.status, 200);
+        assert.equal(res2.headers.get('access-control-allow-origin'), 'https://doctor-portal.org');
+
+        // 4. Unauthorized origin should NOT receive access-control-allow-origin and must NOT cause a 500 error
+        const res3 = await fetch(`${baseUrl}/api/health`, {
+          headers: { 'Origin': 'https://unauthorized-attacker.com' }
+        });
+        assert.notEqual(res3.status, 500, 'CORS rejection must not trigger a 500 server crash');
+        assert.equal(res3.headers.get('access-control-allow-origin'), null, 'Unauthorized origin must not have CORS header');
+
+        // 5. Preflight OPTIONS for unauthorized origin must not return CORS allow header
+        const resOpt = await fetch(`${baseUrl}/api/health`, {
+          method: 'OPTIONS',
+          headers: {
+            'Origin': 'https://unauthorized-attacker.com',
+            'Access-Control-Request-Method': 'GET'
+          }
+        });
+        assert.notEqual(resOpt.status, 500, 'Preflight rejection must not crash with 500');
+        assert.equal(resOpt.headers.get('access-control-allow-origin'), null, 'Preflight must not allow unauthorized origin');
+      } finally {
+        if (originalOrigin !== undefined) {
+          process.env.CORS_ORIGIN = originalOrigin;
+        } else {
+          delete process.env.CORS_ORIGIN;
+        }
+        if (originalFrontendUrl !== undefined) {
+          process.env.FRONTEND_URL = originalFrontendUrl;
+        } else {
+          delete process.env.FRONTEND_URL;
+        }
+      }
     });
   });
 

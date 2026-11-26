@@ -2,6 +2,9 @@
  * Express Application Setup for VEAYOS Homoeopathy ClinicalOS Backend
  */
 
+import dotenv from 'dotenv';
+dotenv.config();
+
 import express from 'express';
 import cors from 'cors';
 import authRoutes from './routes/auth.routes.js';
@@ -16,22 +19,48 @@ import whatsappRoutes from './routes/whatsapp.routes.js';
 
 const app = express();
 
-// CORS Configuration with Production Origins Support (FRONTEND_URL or CORS_ORIGIN)
-const rawCorsOrigin = process.env.FRONTEND_URL || process.env.CORS_ORIGIN || '*';
-const allowedOrigins = rawCorsOrigin === '*'
-  ? '*'
-  : rawCorsOrigin.split(',').map((o) => o.trim()).filter(Boolean);
+// Helper to dynamically resolve allowed CORS origins (handles comma-separated list, trims, strips trailing slashes, combines FRONTEND_URL & CORS_ORIGIN)
+export function getAllowedOrigins() {
+  const origins = [];
+  if (process.env.FRONTEND_URL) {
+    origins.push(...process.env.FRONTEND_URL.split(','));
+  }
+  if (process.env.CORS_ORIGIN) {
+    origins.push(...process.env.CORS_ORIGIN.split(','));
+  }
+  if (origins.length === 0) {
+    return '*';
+  }
+  const cleaned = origins.map((o) => o.trim().replace(/\/+$/, '')).filter(Boolean);
+  if (cleaned.includes('*')) {
+    return '*';
+  }
+  return Array.from(new Set(cleaned));
+}
 
+// CORS Configuration with Production Multi-Origin & Credentials Support
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow server-to-server, curl, mobile apps without Origin header, or wildcard mode
-    if (!origin || allowedOrigins === '*' || (Array.isArray(allowedOrigins) && allowedOrigins.includes('*'))) {
+    const allowed = getAllowedOrigins();
+
+    // Allow requests without Origin header (server-to-server, curl, mobile native apps, health checks)
+    if (!origin) {
       return callback(null, true);
     }
-    if (Array.isArray(allowedOrigins) && allowedOrigins.includes(origin)) {
+
+    // Wildcard mode allows all origins
+    if (allowed === '*' || (Array.isArray(allowed) && allowed.includes('*'))) {
       return callback(null, true);
     }
-    return callback(new Error(`Origin ${origin} is not allowed by CORS policy.`));
+
+    // Check against allowed origins list (normalized without trailing slashes)
+    const normalizedOrigin = origin.replace(/\/+$/, '');
+    if (Array.isArray(allowed) && (allowed.includes(normalizedOrigin) || allowed.includes(origin))) {
+      return callback(null, true);
+    }
+
+    // Disallowed origin: cleanly disallow without crashing into a 500 error
+    return callback(null, false);
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],

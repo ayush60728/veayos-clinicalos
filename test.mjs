@@ -92,10 +92,21 @@ assert(apiServiceSrc.includes('VITE_API_URL'), 'apiService.js must reference VIT
 assert(apiServiceSrc.includes('getApiBaseUrl'), 'apiService.js must export getApiBaseUrl');
 assert(apiServiceSrc.includes('getHealthUrl'), 'apiService.js must export getHealthUrl');
 
+const geminiSrc = readFileSync('frontend/src/services/geminiService.js', 'utf8');
+assert(geminiSrc.includes("import { apiService } from './apiService.js'"), 'geminiService must route through apiService');
+assert(!geminiSrc.includes("fetch('/api/v1/repertory/analyze'"), 'geminiService must not use raw same-origin fetch');
+
+const aisensySrc = readFileSync('frontend/src/services/aisensyService.js', 'utf8');
+assert(aisensySrc.includes("import { apiService } from './apiService.js'"), 'aisensyService must route through apiService');
+assert(!aisensySrc.includes("fetch('/api/v1/whatsapp/send'"), 'aisensyService must not use raw same-origin fetch');
+
 const viteConfigSrc = readFileSync('frontend/vite.config.js', 'utf8');
 assert(viteConfigSrc.includes("'/api':"), 'vite.config.js must configure dev proxy for /api');
 
-console.log('   ✓ Frontend API client connection and dynamic VITE_API_URL configuration verified.');
+const backendAppSrc = readFileSync('backend/src/app.js', 'utf8');
+assert(backendAppSrc.includes('getAllowedOrigins'), 'backend app.js must dynamically resolve CORS origins');
+
+console.log('   ✓ Frontend API client connection, services integration, and dynamic VITE_API_URL configuration verified.');
 
 // 5. Run Standalone Frontend Automated Test Suite
 console.log('5. Executing Standalone Frontend Test Suite (frontend/test/frontend.test.mjs)...');

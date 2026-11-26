@@ -5,6 +5,7 @@
  */
 
 import { storageService } from './storageService.js';
+import { apiService } from './apiService.js';
 
 export const aisensyService = {
   // Test connection to Aisensy API
@@ -41,36 +42,7 @@ export const aisensyService = {
       throw new Error(`Patient ${patient.name} has opted out of WhatsApp communications.`);
     }
 
-    // Attempt backend Aisensy gateway endpoint (/api/v1/whatsapp/send)
-    try {
-      const res = await fetch('/api/v1/whatsapp/send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ patient, prescription, customMessage })
-      });
-      if (res.ok) {
-        const data = await res.json();
-        this.logMessage({
-          patientId: patient.id,
-          patientName: patient.name,
-          phone: patient.phone,
-          type: 'prescription_share',
-          status: 'sent',
-          payloadSnippet: `Prescription #${prescription.id} (Dispatched via API)`
-        });
-        return {
-          success: true,
-          message: data.message || `Prescription dispatched via WhatsApp to ${patient.name} (${patient.phone})`,
-          timestamp: new Date().toISOString()
-        };
-      }
-    } catch (err) {
-      // Backend unavailable; proceed with client delivery simulation
-    }
-
-    const settings = storageService.getAisensySettings();
-    const cleanPhone = patient.phone.replace(/[^0-9+]/g, '');
-
+    const cleanPhone = String(patient.phone || '').replace(/[^0-9+]/g, '');
     const clinicSettings = storageService.getClinicSettings();
     const docName = prescription.doctorName || clinicSettings.doctorName || 'Dr. V. P. Dixit';
     const formattedDoctor = docName.startsWith('Dr.') ? docName : `Dr. ${docName}`;
@@ -91,6 +63,39 @@ Warm regards,
 ${clinicSettings.clinicName}
 Contact: ${clinicSettings.phone}
     `.trim();
+
+    // Attempt backend Aisensy gateway endpoint (/api/v1/whatsapp/send) via apiService
+    try {
+      const data = await apiService.sendWhatsApp({ patient, prescription, customMessage });
+      if (data && data.success) {
+        const logItem = storageService.logWhatsAppMessage({
+          patientId: patient.id,
+          patientName: patient.name,
+          phone: cleanPhone,
+          type: 'prescription',
+          status: 'sent',
+          messageText: data.log?.message || messageBody
+        });
+
+        // Update prescription record
+        storageService.savePrescription({
+          ...prescription,
+          sentViaWhatsApp: true,
+          whatsAppSentAt: new Date().toLocaleString()
+        });
+
+        return {
+          success: true,
+          message: data.message || `Prescription dispatched via WhatsApp to ${patient.name} (${cleanPhone})`,
+          logId: logItem.id,
+          recipient: cleanPhone,
+          status: 'delivered',
+          timestamp: new Date().toISOString()
+        };
+      }
+    } catch (err) {
+      // Backend unavailable; proceed with client delivery simulation
+    }
 
     // Log queued message
     const logItem = storageService.logWhatsAppMessage({

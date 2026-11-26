@@ -17,8 +17,9 @@ export const getApiBaseUrl = () => {
     envUrl = process.env.VITE_API_URL;
   }
 
-  if (envUrl) {
+  if (envUrl && typeof envUrl === 'string') {
     const trimmed = envUrl.trim().replace(/\/+$/, '');
+    if (!trimmed) return '/api/v1';
     return trimmed.endsWith('/api/v1') ? trimmed : `${trimmed}/api/v1`;
   }
 
@@ -30,10 +31,9 @@ export const getHealthUrl = () => {
   const base = getApiBaseUrl();
   return base.endsWith('/api/v1')
     ? base.replace(/\/api\/v1$/, '/api/health')
-    : '/api/health';
+    : (base.endsWith('/') ? `${base}api/health` : `${base}/api/health`);
 };
 
-const API_BASE = getApiBaseUrl();
 const TOKEN_KEY = 'veayos_auth_token';
 
 export const apiService = {
@@ -64,7 +64,9 @@ export const apiService = {
 
   // Base request helper with headers
   async request(endpoint, options = {}) {
-    const url = `${API_BASE}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+    const base = getApiBaseUrl();
+    const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+    const url = `${base}${cleanEndpoint}`;
     const headers = {
       'Content-Type': 'application/json',
       ...(options.headers || {})
@@ -96,9 +98,7 @@ export const apiService = {
   // Backend Health Check
   async checkHealth() {
     try {
-      const healthUrl = API_BASE.endsWith('/api/v1')
-        ? API_BASE.replace(/\/api\/v1$/, '/api/health')
-        : '/api/health';
+      const healthUrl = getHealthUrl();
       const res = await fetch(healthUrl);
       if (res.ok) {
         return await res.json();

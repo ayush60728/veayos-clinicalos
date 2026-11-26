@@ -107,16 +107,15 @@ Push this directory to GitHub and import it into Vercel or Netlify. The included
 
 ---
 
-## 📦 Pushing to a Separate GitHub Repository (Polyrepo)
+## 📦 Standalone GitHub Repository (Polyrepo)
 
-To publish this frontend as its own dedicated GitHub repository:
+This frontend is published and maintained as a standalone GitHub repository:
+- **GitHub Repository**: [ayush60728/veayos-clinicalos-frontend](https://github.com/ayush60728/veayos-clinicalos-frontend)
 
+To push changes to this repository:
 ```bash
 cd frontend
-git init
 git add .
-git commit -m "feat: initial commit for VEAYOS Homoeopathy ClinicalOS Frontend PWA"
-git branch -M main
-git remote add origin https://github.com/<YOUR_ORGANIZATION>/veayos-clinicalos-frontend.git
-git push -u origin main
+git commit -m "feat: updates to frontend"
+git push origin main
 ```

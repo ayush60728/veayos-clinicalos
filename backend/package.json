@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
-    "build": "node -e \"console.log('Backend build verified')\"",
+    "build": "node --check src/server.js src/app.js",
     "test": "node --test test/**/*.test.js"
   },
   "keywords": [
